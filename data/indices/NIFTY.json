@@ -1,24 +1,46 @@
-{
-  "records": {
-    "data": [
-      {
-        "strikePrice": 25000,
-        "CE": {
-          "openInterest": 120000,
-          "impliedVolatility": 12.5,
-          "lastPrice": 85.2,
-          "totalTradedVolume": 4200
-        }
-      },
-      {
-        "strikePrice": 25500,
-        "PE": {
-          "openInterest": 98000,
-          "impliedVolatility": 14.3,
-          "lastPrice": 65.5,
-          "totalTradedVolume": 3100
-        }
-      }
-    ]
-  }
-}
+import json
+import requests
+from datetime import datetime
+from github import Github  # pip install PyGithub
+
+# === GitHub Auth ===
+GITHUB_TOKEN = "ghp_xxx"  # 👈 apna GitHub Personal Access Token dalo
+REPO_NAME = "complianc/nse-data-store"
+FILE_PATH = "data/indices/NIFTY.json"
+
+# === NSE Option Chain Scraper ===
+def fetch_nse_option_chain(symbol="NIFTY"):
+    url = f"https://www.nseindia.com/api/option-chain-indices?symbol={symbol}"
+    headers = {
+        "User-Agent": "Mozilla/5.0",
+        "Accept": "application/json",
+        "Referer": f"https://www.nseindia.com/option-chain",
+    }
+    session = requests.Session()
+    session.headers.update(headers)
+
+    # First request for cookies
+    session.get("https://www.nseindia.com", timeout=5)
+    response = session.get(url, timeout=5)
+    data = response.json()
+    return data
+
+# === Push to GitHub ===
+def push_to_github(data, commit_msg="Update NIFTY Option Chain"):
+    g = Github(GITHUB_TOKEN)
+    repo = g.get_repo(REPO_NAME)
+    try:
+        contents = repo.get_contents(FILE_PATH)
+        repo.update_file(contents.path, commit_msg, json.dumps(data, indent=2), contents.sha, branch="main")
+        print("✅ GitHub JSON updated.")
+    except Exception as e:
+        print("❌ Failed to update:", e)
+
+# === MAIN ===
+if __name__ == "__main__":
+    try:
+        data = fetch_nse_option_chain("NIFTY")
+        push_to_github(data)
+    except Exception as e:
+        print("❌ Error:", e)
+
