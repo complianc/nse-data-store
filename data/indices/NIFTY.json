@@ -1,1 +1,24 @@
-
+{
+  "records": {
+    "data": [
+      {
+        "strikePrice": 25000,
+        "CE": {
+          "openInterest": 120000,
+          "impliedVolatility": 12.5,
+          "lastPrice": 85.2,
+          "totalTradedVolume": 4200
+        }
+      },
+      {
+        "strikePrice": 25500,
+        "PE": {
+          "openInterest": 98000,
+          "impliedVolatility": 14.3,
+          "lastPrice": 65.5,
+          "totalTradedVolume": 3100
+        }
+      }
+    ]
+  }
+}
